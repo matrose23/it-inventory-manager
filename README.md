@@ -21,6 +21,7 @@ Git & GitHub
 
 Project Structure:
 -----------------
+```
 it-inventory-manager
 │
 ├── Models
@@ -35,6 +36,7 @@ it-inventory-manager
 │
 ├── Program.cs
 └── README.md
+```
 
 How to Run:
 ----------
