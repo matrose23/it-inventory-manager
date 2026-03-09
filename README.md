@@ -11,12 +11,17 @@ Edit device information
 Delete devices
 Assign devices to users
 Show device status (available / assigned)
+Search devices by manufacturer
+Search devices by location
+Find devices by serial number
+Filter devices by status
+General search function
 
 Technologies:
 ------------
 C#
 .NET Console Application
-File-based data storage
+In-memory data storage (List<Device>)
 Git & GitHub
 
 Project Structure:
@@ -51,6 +56,15 @@ Add a new laptop to the inventory
 Assign the device to a user
 Change the device status to assigned
 View all devices in the system
+
+Project Progress:
+----------------
+
+Tag 1 – Project setup  
+Tag 2 – Device model and service structure  
+Tag 3 – Add and display devices  
+Tag 4 – Update, delete and change device status  
+Tag 5 – Search and filtering features
 
 Author:
 ------
