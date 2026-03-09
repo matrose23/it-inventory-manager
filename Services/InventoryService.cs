@@ -51,5 +51,34 @@ namespace ITInventoryManager.Services
             devices.Remove(device);
             return true;
         }
+        public void ChangeDeviceStatus(int id, DeviceStatus newStatus)
+        {
+            var device = devices.FirstOrDefault(d => d.Id == id);
+
+            if (device == null)
+            {
+                Console.WriteLine("Gerät nicht gefunden.");
+                return;
+            }
+
+            device.Status = newStatus;
+            Console.WriteLine("Status wurde geändert.");
+        }
+        public void UpdateDevice(int id, string location, string notes)
+        {
+            var device = devices.FirstOrDefault(d => d.Id == id);
+
+            if (device == null)
+            {
+                Console.WriteLine("Gerät nicht gefunden.");
+                return;
+            }
+
+            device.Location = location;
+            device.Notes = notes;
+
+            Console.WriteLine("Gerät wurde aktualisiert.");
+        }
+
     }
 }

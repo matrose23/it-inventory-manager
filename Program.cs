@@ -1,4 +1,5 @@
 ﻿using System;
+using ITInventoryManager.Enums;
 using ITInventoryManager.Models;
 using ITInventoryManager.Services;
 
@@ -17,6 +18,7 @@ namespace ITInventoryManager
                 Console.WriteLine("1 - Gerät hinzufügen");
                 Console.WriteLine("2 - Geräte anzeigen");
                 Console.WriteLine("3 - Gerät löschen");
+                Console.WriteLine("4 - Status ändern");
                 Console.WriteLine("0 - Beenden");
                 Console.Write("Auswahl: ");
 
@@ -29,6 +31,11 @@ namespace ITInventoryManager
                         Console.Write("Hersteller (z.B. Dell/HP/Lenovo): ");
                         string manufacturer = Console.ReadLine() ?? "";
 
+                        if (string.IsNullOrWhiteSpace(manufacturer))
+                        {
+                            Console.WriteLine("Hersteller darf nicht leer sein.");
+                            continue;
+                        }
                         Console.Write("Modell (z.B. Latitude 5490): ");
                         string model = Console.ReadLine() ?? "";
 
@@ -110,6 +117,35 @@ namespace ITInventoryManager
                         else
                             Console.WriteLine("Nicht gefunden: Kein Gerät mit dieser Id.");
 
+                        break;
+
+                    case "4":
+                        Console.Write("Geräte ID: ");
+                        int id = int.Parse(Console.ReadLine());
+
+                        Console.WriteLine("Neuer Status:");
+                        Console.WriteLine("0 - Available");
+                        Console.WriteLine("1 - Assigned");
+                        Console.WriteLine("2 - InRepair");
+                        Console.WriteLine("3 - Retired");
+
+                        int statusInput = int.Parse(Console.ReadLine());
+                        DeviceStatus newStatus = (DeviceStatus)statusInput;
+
+                        service.ChangeDeviceStatus(id, newStatus);
+                        break;
+
+                    case "5":
+                        Console.Write("Geräte ID: ");
+                        int editId = int.Parse(Console.ReadLine());
+
+                        Console.Write("Neuer Standort: ");
+                        string location = Console.ReadLine();
+
+                        Console.Write("Neue Bemerkung: ");
+                        string notes = Console.ReadLine();
+
+                        service.UpdateDevice(editId, location, notes);
                         break;
 
                     case "0":
