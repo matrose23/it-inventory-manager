@@ -1,175 +1,271 @@
 ﻿using System;
 using ITInventoryManager.Enums;
-using ITInventoryManager.Models;
 using ITInventoryManager.Services;
 
 namespace ITInventoryManager
 {
-    internal class Program
+    class Program
     {
         static void Main(string[] args)
         {
-            InventoryService service = new InventoryService();
+            InventoryService inventoryService = new InventoryService();
             bool running = true;
 
             while (running)
             {
-                Console.WriteLine("==== IT Inventory Manager ====");
+                Console.WriteLine("\n===== IT Inventory Manager =====");
                 Console.WriteLine("1 - Gerät hinzufügen");
-                Console.WriteLine("2 - Geräte anzeigen");
+                Console.WriteLine("2 - Alle Geräte anzeigen");
                 Console.WriteLine("3 - Gerät löschen");
                 Console.WriteLine("4 - Status ändern");
+                Console.WriteLine("5 - Gerät bearbeiten");
+                Console.WriteLine("6 - Geräte nach Status anzeigen");
+                Console.WriteLine("7 - Geräte nach Hersteller suchen");
+                Console.WriteLine("8 - Geräte nach Standort suchen");
+                Console.WriteLine("9 - Gerät nach Seriennummer suchen");
+                Console.WriteLine("10 - Allgemeine Suche");
                 Console.WriteLine("0 - Beenden");
-                Console.Write("Auswahl: ");
+                Console.Write("Bitte wählen Sie eine Option: ");
 
-                string choice = Console.ReadLine() ?? "";
-                Console.WriteLine();
+                string choice = Console.ReadLine();
 
                 switch (choice)
                 {
                     case "1":
-                        Console.Write("Hersteller (z.B. Dell/HP/Lenovo): ");
-                        string manufacturer = Console.ReadLine() ?? "";
+                        Console.Write("Hersteller: ");
+                        string manufacturer = Console.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(manufacturer))
-                        {
-                            Console.WriteLine("Hersteller darf nicht leer sein.");
-                            continue;
-                        }
-                        Console.Write("Modell (z.B. Latitude 5490): ");
-                        string model = Console.ReadLine() ?? "";
+                        Console.Write("Modell: ");
+                        string model = Console.ReadLine();
 
                         Console.Write("Seriennummer: ");
-                        string serial = Console.ReadLine() ?? "";
+                        string serialNumber = Console.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(manufacturer) ||
-                            string.IsNullOrWhiteSpace(model) ||
-                            string.IsNullOrWhiteSpace(serial))
-                        {
-                            Console.WriteLine("Fehler: Hersteller, Modell und Seriennummer dürfen nicht leer sein.");
-                            continue;
-                        }
+                        Console.Write("Garantie bis: ");
+                        string warrantyUntil = Console.ReadLine();
 
-                        Console.Write("Garantie bis (z.B. 12/2027 oder unbekannt): ");
-                        string warrantyUntil = Console.ReadLine() ?? "";
+                        Console.Write("Standort: ");
+                        string location = Console.ReadLine();
 
-                        Console.Write("Standort/Raum (z.B. Büro 2 / Raum 101): ");
-                        string location = Console.ReadLine() ?? "";
+                        Console.Write("Notizen: ");
+                        string notes = Console.ReadLine();
 
-                        Console.Write("Bemerkung (optional): ");
-                        string notes = Console.ReadLine() ?? "";
+                        var newDevice = inventoryService.AddDevice(
+                            manufacturer,
+                            model,
+                            serialNumber,
+                            warrantyUntil,
+                            location,
+                            notes);
 
-                        var added = service.AddDevice(
-                            manufacturer.Trim(),
-                            model.Trim(),
-                            serial.Trim(),
-                            warrantyUntil.Trim(),
-                            location.Trim(),
-                            notes.Trim()
-                        );
-
-                        Console.WriteLine($"OK: Gerät hinzugefügt. Id={added.Id}, Hersteller={added.Manufacturer}, Modell={added.Model}, SN={added.SerialNumber}, Status={added.Status}");
+                        Console.WriteLine($"Gerät wurde hinzugefügt. ID: {newDevice.Id}");
                         break;
 
                     case "2":
-                        var devices = service.GetAllDevices();
+                        var allDevices = inventoryService.GetAllDevices();
 
-                        if (devices.Count == 0)
+                        if (allDevices.Count == 0)
                         {
                             Console.WriteLine("Keine Geräte vorhanden.");
-                            break;
                         }
-
-                        Console.WriteLine("---- Geräte-Liste ----");
-                        Console.WriteLine("ID  Hersteller    Modell         SN             Garantie     Standort     Status     Bemerkung");
-                        Console.WriteLine("------------------------------------------------------------------------------------------------");
-
-                        foreach (Device d in devices)
+                        else
                         {
-                            Console.WriteLine(
-                                $"{d.Id,-3} " +
-                                $"{Fit(d.Manufacturer, 12)} " +
-                                $"{Fit(d.Model, 13)} " +
-                                $"{Fit(d.SerialNumber, 14)} " +
-                                $"{Fit(d.WarrantyUntil, 10)} " +
-                                $"{Fit(d.Location, 11)} " +
-                                $"{Fit(d.Status.ToString(), 9)} " +
-                                $"{Fit(d.Notes, 25)}"
-                            );
+                            foreach (var device in allDevices)
+                            {
+                                Console.WriteLine($"ID: {device.Id}");
+                                Console.WriteLine($"Hersteller: {device.Manufacturer}");
+                                Console.WriteLine($"Modell: {device.Model}");
+                                Console.WriteLine($"Seriennummer: {device.SerialNumber}");
+                                Console.WriteLine($"Garantie bis: {device.WarrantyUntil}");
+                                Console.WriteLine($"Standort: {device.Location}");
+                                Console.WriteLine($"Notizen: {device.Notes}");
+                                Console.WriteLine($"Status: {device.Status}");
+                                Console.WriteLine("-----------------------------------");
+                            }
                         }
-
                         break;
 
                     case "3":
-                        Console.Write("Id zum Löschen: ");
-                        string input = Console.ReadLine() ?? "";
-
-                        if (!int.TryParse(input, out int id))
+                        Console.Write("Bitte geben Sie die ID des Geräts ein: ");
+                        if (int.TryParse(Console.ReadLine(), out int deleteId))
                         {
-                            Console.WriteLine("Fehler: Bitte eine gültige Zahl eingeben.");
-                            break;
+                            bool deleted = inventoryService.DeleteDeviceById(deleteId);
+                            Console.WriteLine(deleted
+                                ? "Gerät wurde gelöscht."
+                                : "Gerät nicht gefunden.");
                         }
-
-                        bool deleted = service.DeleteDeviceById(id);
-
-                        if (deleted)
-                            Console.WriteLine("OK: Gerät wurde gelöscht.");
                         else
-                            Console.WriteLine("Nicht gefunden: Kein Gerät mit dieser Id.");
-
+                        {
+                            Console.WriteLine("Ungültige ID.");
+                        }
                         break;
 
                     case "4":
-                        Console.Write("Geräte ID: ");
-                        int id = int.Parse(Console.ReadLine());
+                        Console.Write("Bitte geben Sie die ID des Geräts ein: ");
+                        if (!int.TryParse(Console.ReadLine(), out int statusId))
+                        {
+                            Console.WriteLine("Ungültige ID.");
+                            break;
+                        }
 
-                        Console.WriteLine("Neuer Status:");
-                        Console.WriteLine("0 - Available");
-                        Console.WriteLine("1 - Assigned");
-                        Console.WriteLine("2 - InRepair");
-                        Console.WriteLine("3 - Retired");
+                        Console.WriteLine("Neuen Status wählen:");
+                        Console.WriteLine("1 - Available");
+                        Console.WriteLine("2 - InUse");
+                        Console.WriteLine("3 - InRepair");
+                        Console.WriteLine("4 - Retired");
 
-                        int statusInput = int.Parse(Console.ReadLine());
-                        DeviceStatus newStatus = (DeviceStatus)statusInput;
+                        if (!int.TryParse(Console.ReadLine(), out int statusChoice) || statusChoice < 1 || statusChoice > 4)
+                        {
+                            Console.WriteLine("Ungültige Eingabe.");
+                            break;
+                        }
 
-                        service.ChangeDeviceStatus(id, newStatus);
+                        DeviceStatus newStatus = (DeviceStatus)(statusChoice - 1);
+                        bool statusChanged = inventoryService.ChangeDeviceStatus(statusId, newStatus);
+
+                        Console.WriteLine(statusChanged
+                            ? "Status wurde geändert."
+                            : "Gerät nicht gefunden.");
                         break;
 
                     case "5":
-                        Console.Write("Geräte ID: ");
-                        int editId = int.Parse(Console.ReadLine());
+                        Console.Write("Bitte geben Sie die ID des Geräts ein: ");
+                        if (!int.TryParse(Console.ReadLine(), out int updateId))
+                        {
+                            Console.WriteLine("Ungültige ID.");
+                            break;
+                        }
 
                         Console.Write("Neuer Standort: ");
-                        string location = Console.ReadLine();
+                        string newLocation = Console.ReadLine();
 
-                        Console.Write("Neue Bemerkung: ");
-                        string notes = Console.ReadLine();
+                        Console.Write("Neue Notizen: ");
+                        string newNotes = Console.ReadLine();
 
-                        service.UpdateDevice(editId, location, notes);
+                        bool updated = inventoryService.UpdateDevice(updateId, newLocation, newNotes);
+
+                        Console.WriteLine(updated
+                            ? "Gerät wurde aktualisiert."
+                            : "Gerät nicht gefunden.");
+                        break;
+
+                    case "6":
+                        Console.WriteLine("Status wählen:");
+                        Console.WriteLine("1 - Available");
+                        Console.WriteLine("2 - InUse");
+                        Console.WriteLine("3 - InRepair");
+                        Console.WriteLine("4 - Retired");
+
+                        if (!int.TryParse(Console.ReadLine(), out int filterStatusChoice) || filterStatusChoice < 1 || filterStatusChoice > 4)
+                        {
+                            Console.WriteLine("Ungültige Eingabe.");
+                            break;
+                        }
+
+                        DeviceStatus selectedStatus = (DeviceStatus)(filterStatusChoice - 1);
+                        var devicesByStatus = inventoryService.GetDevicesByStatus(selectedStatus);
+
+                        if (devicesByStatus.Count == 0)
+                        {
+                            Console.WriteLine("Keine Geräte mit diesem Status gefunden.");
+                        }
+                        else
+                        {
+                            foreach (var device in devicesByStatus)
+                            {
+                                Console.WriteLine($"{device.Id} - {device.Manufacturer} {device.Model} - {device.Status}");
+                            }
+                        }
+                        break;
+
+                    case "7":
+                        Console.Write("Bitte Hersteller eingeben: ");
+                        string searchManufacturer = Console.ReadLine();
+
+                        var devicesByManufacturer = inventoryService.GetDevicesByManufacturer(searchManufacturer);
+
+                        if (devicesByManufacturer.Count == 0)
+                        {
+                            Console.WriteLine("Keine Geräte gefunden.");
+                        }
+                        else
+                        {
+                            foreach (var device in devicesByManufacturer)
+                            {
+                                Console.WriteLine($"{device.Id} - {device.Manufacturer} {device.Model} - {device.Location}");
+                            }
+                        }
+                        break;
+
+                    case "8":
+                        Console.Write("Bitte Standort eingeben: ");
+                        string searchLocation = Console.ReadLine();
+
+                        var devicesByLocation = inventoryService.GetDevicesByLocation(searchLocation);
+
+                        if (devicesByLocation.Count == 0)
+                        {
+                            Console.WriteLine("Keine Geräte gefunden.");
+                        }
+                        else
+                        {
+                            foreach (var device in devicesByLocation)
+                            {
+                                Console.WriteLine($"{device.Id} - {device.Manufacturer} {device.Model} - {device.Location}");
+                            }
+                        }
+                        break;
+
+                    case "9":
+                        Console.Write("Bitte Seriennummer eingeben: ");
+                        string searchSerialNumber = Console.ReadLine();
+
+                        var deviceBySerial = inventoryService.GetDeviceBySerialNumber(searchSerialNumber);
+
+                        if (deviceBySerial == null)
+                        {
+                            Console.WriteLine("Kein Gerät gefunden.");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"ID: {deviceBySerial.Id}");
+                            Console.WriteLine($"Hersteller: {deviceBySerial.Manufacturer}");
+                            Console.WriteLine($"Modell: {deviceBySerial.Model}");
+                            Console.WriteLine($"Seriennummer: {deviceBySerial.SerialNumber}");
+                            Console.WriteLine($"Standort: {deviceBySerial.Location}");
+                            Console.WriteLine($"Status: {deviceBySerial.Status}");
+                        }
+                        break;
+
+                    case "10":
+                        Console.Write("Suchbegriff eingeben: ");
+                        string keyword = Console.ReadLine();
+
+                        var searchResults = inventoryService.SearchDevices(keyword);
+
+                        if (searchResults.Count == 0)
+                        {
+                            Console.WriteLine("Keine Geräte gefunden.");
+                        }
+                        else
+                        {
+                            foreach (var device in searchResults)
+                            {
+                                Console.WriteLine($"{device.Id} - {device.Manufacturer} {device.Model} - {device.Location} - {device.Status}");
+                            }
+                        }
                         break;
 
                     case "0":
                         running = false;
+                        Console.WriteLine("Programm beendet.");
                         break;
 
                     default:
-                        Console.WriteLine("Ungültige Auswahl");
+                        Console.WriteLine("Ungültige Auswahl.");
                         break;
                 }
-
-                Console.WriteLine();
             }
-        }
-
-        // Passt Texte an eine feste Spaltenbreite für die Tabellenausgabe an
-        static string Fit(string value, int width)
-        {
-            value = (value ?? "").Trim();
-
-            if (value.Length > width)
-                return value.Substring(0, width - 1) + "…";
-
-            return value.PadRight(width);
         }
     }
 }

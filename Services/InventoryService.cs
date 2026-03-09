@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ITInventoryManager.Enums;
 using ITInventoryManager.Models;
@@ -36,6 +37,7 @@ namespace ITInventoryManager.Services
             return device;
         }
 
+        // Gibt alle Geräte zurück
         public List<Device> GetAllDevices()
         {
             return devices;
@@ -51,34 +53,70 @@ namespace ITInventoryManager.Services
             devices.Remove(device);
             return true;
         }
-        public void ChangeDeviceStatus(int id, DeviceStatus newStatus)
+
+        // Ändert den Status eines Geräts
+        public bool ChangeDeviceStatus(int id, DeviceStatus newStatus)
         {
             var device = devices.FirstOrDefault(d => d.Id == id);
 
             if (device == null)
-            {
-                Console.WriteLine("Gerät nicht gefunden.");
-                return;
-            }
+                return false;
 
             device.Status = newStatus;
-            Console.WriteLine("Status wurde geändert.");
+            return true;
         }
-        public void UpdateDevice(int id, string location, string notes)
+
+        // Aktualisiert Standort und Notizen eines Geräts
+        public bool UpdateDevice(int id, string location, string notes)
         {
             var device = devices.FirstOrDefault(d => d.Id == id);
 
             if (device == null)
-            {
-                Console.WriteLine("Gerät nicht gefunden.");
-                return;
-            }
+                return false;
 
             device.Location = location;
             device.Notes = notes;
-
-            Console.WriteLine("Gerät wurde aktualisiert.");
+            return true;
         }
 
+        // Gibt alle Geräte mit einem bestimmten Status zurück
+        public List<Device> GetDevicesByStatus(DeviceStatus status)
+        {
+            return devices.Where(d => d.Status == status).ToList();
+        }
+
+        // Sucht Geräte nach Hersteller
+        public List<Device> GetDevicesByManufacturer(string manufacturer)
+        {
+            return devices
+                .Where(d => d.Manufacturer.Contains(manufacturer, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Sucht Geräte nach Standort
+        public List<Device> GetDevicesByLocation(string location)
+        {
+            return devices
+                .Where(d => d.Location.Contains(location, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Sucht ein Gerät anhand der Seriennummer
+        public Device? GetDeviceBySerialNumber(string serialNumber)
+        {
+            return devices.FirstOrDefault(d =>
+                d.SerialNumber.Equals(serialNumber, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Allgemeine Suche nach Hersteller, Modell oder Standort
+        public List<Device> SearchDevices(string keyword)
+        {
+            return devices
+                .Where(d =>
+                    d.Manufacturer.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                    d.Model.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                    d.Location.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
     }
 }
