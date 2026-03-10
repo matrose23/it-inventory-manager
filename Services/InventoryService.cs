@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.Text.Json;
 using ITInventoryManager.Enums;
 using ITInventoryManager.Models;
 
@@ -10,6 +12,43 @@ namespace ITInventoryManager.Services
     {
         private readonly List<Device> devices = new List<Device>();
         private int nextId = 1;
+        private readonly string filePath = "devices.json";
+
+        public InventoryService()
+        {
+            LoadFromFile();
+        }
+
+        private void SaveToFile()
+        {
+            var json = JsonSerializer.Serialize(devices, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            File.WriteAllText(filePath, json);
+        }
+
+        private void LoadFromFile()
+        {
+            if (!File.Exists(filePath))
+                return;
+
+            string json = File.ReadAllText(filePath);
+
+            var loadedDevices = JsonSerializer.Deserialize<List<Device>>(json);
+
+            if (loadedDevices != null)
+            {
+                devices.Clear();
+                devices.AddRange(loadedDevices);
+
+                if (devices.Count > 0)
+                {
+                    nextId = devices.Max(d => d.Id) + 1;
+                }
+            }
+        }
 
         // Fügt ein neues Gerät mit Seriennummer hinzu
         public Device AddDevice(
@@ -33,7 +72,9 @@ namespace ITInventoryManager.Services
                 AssignedUserId = null
             };
 
-            devices.Add(device);
+            devices.Add(device);   // Gerät wird zur Liste hinzugefügt
+            SaveToFile();          // Daten werden in der JSON-Datei gespeichert
+
             return device;
         }
 
@@ -50,7 +91,9 @@ namespace ITInventoryManager.Services
             if (device == null)
                 return false;
 
-            devices.Remove(device);
+            devices.Remove(device);   // Gerät wird aus der Inventarliste entfernt
+            SaveToFile();             // Änderungen werden in der JSON-Datei gespeichert
+
             return true;
         }
 
@@ -62,7 +105,9 @@ namespace ITInventoryManager.Services
             if (device == null)
                 return false;
 
-            device.Status = newStatus;
+            device.Status = newStatus;   // Status des Geräts wird aktualisiert
+            SaveToFile();                // Aktualisierte Daten werden gespeichert
+
             return true;
         }
 
@@ -74,8 +119,11 @@ namespace ITInventoryManager.Services
             if (device == null)
                 return false;
 
-            device.Location = location;
-            device.Notes = notes;
+            device.Location = location;   // Standort wird aktualisiert
+            device.Notes = notes;         // Notizen werden aktualisiert
+
+            SaveToFile();                 // Änderungen werden in der JSON-Datei gespeichert
+
             return true;
         }
 

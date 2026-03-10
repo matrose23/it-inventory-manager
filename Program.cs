@@ -32,23 +32,14 @@ namespace ITInventoryManager
                 switch (choice)
                 {
                     case "1":
-                        Console.Write("Hersteller: ");
-                        string manufacturer = Console.ReadLine();
-
-                        Console.Write("Modell: ");
-                        string model = Console.ReadLine();
-
-                        Console.Write("Seriennummer: ");
-                        string serialNumber = Console.ReadLine();
-
-                        Console.Write("Garantie bis: ");
-                        string warrantyUntil = Console.ReadLine();
-
-                        Console.Write("Standort: ");
-                        string location = Console.ReadLine();
+                        string manufacturer = ReadRequiredText("Hersteller");
+                        string model = ReadRequiredText("Modell");
+                        string serialNumber = ReadRequiredText("Seriennummer");
+                        string warrantyUntil = ReadRequiredText("Garantie bis");
+                        string location = ReadRequiredText("Standort");
 
                         Console.Write("Notizen: ");
-                        string notes = Console.ReadLine();
+                        string notes = Console.ReadLine() ?? "";
 
                         var newDevice = inventoryService.AddDevice(
                             manufacturer,
@@ -59,7 +50,7 @@ namespace ITInventoryManager
                             notes);
 
                         Console.WriteLine($"Gerät wurde hinzugefügt. ID: {newDevice.Id}");
-                        break;
+                        break; ;
 
                     case "2":
                         var allDevices = inventoryService.GetAllDevices();
@@ -267,5 +258,19 @@ namespace ITInventoryManager
                 }
             }
         }
+        static string ReadRequiredText(string fieldName)
+        {
+            while (true)
+            {
+                Console.Write($"{fieldName}: ");
+                string input = Console.ReadLine();
+
+                if (!string.IsNullOrWhiteSpace(input))
+                    return input.Trim();
+
+                Console.WriteLine("Dieses Feld darf nicht leer sein.");
+            }
+        }
+
     }
 }
