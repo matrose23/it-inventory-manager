@@ -71,7 +71,7 @@ ITInventoryManager
 
 ## Programm starten
 
-1. Repository klonen git clone https://github.com/username/it-inventory-manager.git
+1. Repository klonen git clone https://github.com/hasantuncay/it-inventory-manager.git
 
 2. Projekt in **Visual Studio 2022** öffnen
 
